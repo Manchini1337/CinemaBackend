@@ -1,9 +1,9 @@
-const jwt = require("jsonwebtoken");
+const jwt = require('jsonwebtoken');
 const {
   createAccessToken,
   createRefreshToken,
-} = require("../jwtTokens/createToken");
-require("dotenv").config();
+} = require('../jwtTokens/createToken');
+require('dotenv').config();
 
 const verifyAccessToken = (accessToken) => {
   return jwt.verify(accessToken, process.env.PRIVATE_KEY_ACCESS);
@@ -15,26 +15,26 @@ const verifyRefreshToken = (refreshToken) => {
 
 const checkCookies = (req, res) => {
   const cookies = req.cookies;
-  console.log("cookies", cookies);
+  console.log('cookies', cookies);
   if (cookies) {
     invalidateTokens(res);
-    res.statusCode = 401;
-    res.send("");
+    res.statusCode = 200;
+    res.send('');
   } else {
     res.statusCode = 401;
-    res.send("Brak cookies");
+    res.send('Brak cookies');
   }
 };
 
 const invalidateTokens = (res) => {
-  res.clearCookie("access-token");
-  res.clearCookie("refresh-token");
+  res.clearCookie('access-token');
+  res.clearCookie('refresh-token');
 };
 
 const verifyAccess = (req, res) => {
   try {
-    const accessToken = req.cookies["access-token"];
-    const refreshToken = req.cookies["refresh-token"];
+    const accessToken = req.cookies['access-token'];
+    const refreshToken = req.cookies['refresh-token'];
     try {
       const vat = verifyAccessToken(accessToken);
       console.log(vat);
@@ -46,8 +46,8 @@ const verifyAccess = (req, res) => {
         if (vrt && vrt.id) {
           const newAccessToken = createAccessToken(vrt.id, vrt.type);
           const newRefreshToken = createRefreshToken(vrt.id, vrt.type);
-          res.cookie("access-token", newAccessToken);
-          res.cookie("refresh-token", newRefreshToken);
+          res.cookie('access-token', newAccessToken);
+          res.cookie('refresh-token', newRefreshToken);
           return vrt;
         }
       } catch {

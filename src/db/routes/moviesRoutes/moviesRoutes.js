@@ -1,12 +1,12 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("../../config/database");
-const Movies = require("../../models/movies/movieModel");
-const Genres = require("../../models/movies/genreModel");
-const { verifyAccess } = require("../../../../jwtTokens/verifyToken");
-const userTypes = require("../../../../consts");
+const db = require('../../config/database');
+const Movies = require('../../models/movies/movieModel');
+const Genres = require('../../models/movies/genreModel');
+const { verifyAccess } = require('../../../../jwtTokens/verifyToken');
+const userTypes = require('../../../../consts');
 
-router.get("/", (req, res) => {
+router.get('/', (req, res) => {
   async function myFunc() {
     let newMovies = [];
     try {
@@ -14,13 +14,13 @@ router.get("/", (req, res) => {
       movies.reverse();
 
       for (let i = 0; i < movies.length; i++) {
-        console.log("movies: ", movies[i].dataValues);
+        console.log('movies: ', movies[i].dataValues);
         const genre = await Genres.findOne({
           where: { id: movies[i].dataValues.genreId },
         });
         // if genre else res.statuscode 500 brak filmu
-        console.log("genre: ", genre);
-        delete movies[i].dataValues["genreId"];
+        console.log('genre: ', genre);
+        delete movies[i].dataValues['genreId'];
 
         const newMovie = {
           ...movies[i].dataValues,
@@ -34,13 +34,13 @@ router.get("/", (req, res) => {
       res.json(newMovies);
     } catch (error) {
       res.statusCode = 500;
-      res.send("Unallowed");
+      res.send('Unallowed');
     }
   }
   myFunc();
 });
 
-router.post("/", (req, res) => {
+router.post('/', (req, res) => {
   const data = verifyAccess(req, res);
 
   if (
@@ -68,7 +68,7 @@ router.post("/", (req, res) => {
   }
 });
 
-router.put("/", (req, res) => {
+router.put('/', (req, res) => {
   const data = verifyAccess(req, res);
 
   if (
@@ -88,18 +88,18 @@ router.put("/", (req, res) => {
     )
       .then(() => {
         res.statusCode = 200;
-        res.send("Edycja zakończona poprawnie");
+        res.send('Edycja zakończona poprawnie');
       })
       .catch(() => {
         res.statusCode = 500;
-        res.send("Edycja nie udała się");
+        res.send('Edycja nie udała się');
       });
   } else {
     res.sendStatus(403);
   }
 });
 
-router.delete("/", (req, res) => {
+router.delete('/', (req, res) => {
   const data = verifyAccess(req, res);
 
   if (

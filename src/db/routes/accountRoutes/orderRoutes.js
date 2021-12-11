@@ -1,45 +1,59 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const db = require("../../config/database");
-const Orders = require("../../models/accounts/orderModel");
-const Events = require("../../models/cinema/eventModel");
-const Users = require("../../models/accounts/userModel");
-const { verifyAccess } = require("../../../../jwtTokens/verifyToken");
-const userTypes = require("../../../../consts");
+const db = require('../../config/database');
+const Orders = require('../../models/accounts/orderModel');
+const Movies = require('../../models/movies/movieModel');
+const Events = require('../../models/cinema/eventModel');
+const Users = require('../../models/accounts/userModel');
+const { verifyAccess } = require('../../../../jwtTokens/verifyToken');
+const userTypes = require('../../../../consts');
 
-router.get("/", (req, res) => {
+router.get('/', (req, res) => {
   const data = verifyAccess(req, res);
-  console.log(data);
+
   if (data && data.type === userTypes.USER) {
-    Orders.findAll({ where: { userId: data?.id } })
-      .then((orders) => {
+    async function myFunc() {
+      let newOrders = [];
+      try {
+        const orders = await Orders.findAll({ where: { userId: data.id } });
         orders.reverse();
-        orders.map((order) => {
-          Events.findOne({ where: { id: order.dataValues.eventId } })
-            .then((event) => {
-              Users.findOne({ where: { id: order.dataValues.userId } })
-                .then((user) => {
-                  delete order.dataValues["userId"];
-                  delete order.dataValues["eventId"];
-                  const newOrder = { ...order.dataValues, user, event };
-                  res.statusCode = 200;
-                  res.json(newOrder);
-                })
-                .catch((err) => {
-                  res.statusCode = 500;
-                  res.json(err);
-                });
-            })
-            .catch((err) => {
-              res.statusCode = 500;
-              res.json(err);
-            });
-        });
-      })
-      .catch((err) => {
-        res.statusCode = 401;
-        res.json(err);
-      });
+
+        for (let i = 0; i < orders.length; i++) {
+          console.log('orders: ', orders[i].dataValues);
+          const event = await Events.findOne({
+            where: { id: orders[i].dataValues.eventId },
+          });
+          const user = await Users.findOne({
+            where: { id: orders[i].dataValues.userId },
+          });
+          const movie = await Movies.findOne({
+            where: { id: event.dataValues.movieId },
+          });
+
+          delete orders[i].dataValues['userId'];
+          delete orders[i].dataValues['eventId'];
+
+          const newEvent = { ...event.dataValues, movie };
+          delete newEvent.movieId;
+          console.log('New event:' + newEvent);
+
+          const newOrder = {
+            ...orders[i].dataValues,
+            user: user?.dataValues || null,
+            event: newEvent || null,
+          };
+          newOrders.push(newOrder);
+        }
+
+        console.log(newOrders);
+        res.statusCode = 200;
+        res.json(newOrders);
+      } catch (error) {
+        res.statusCode = 500;
+        res.send('Unallowed');
+      }
+    }
+    myFunc();
   }
   if (
     (data && data.type === userTypes.PERSONEL) ||
@@ -52,19 +66,28 @@ router.get("/", (req, res) => {
         orders.reverse();
 
         for (let i = 0; i < orders.length; i++) {
-          console.log("orders: ", orders[i].dataValues);
+          console.log('orders: ', orders[i].dataValues);
           const event = await Events.findOne({
             where: { id: orders[i].dataValues.eventId },
           });
           const user = await Users.findOne({
             where: { id: orders[i].dataValues.userId },
           });
-          delete orders[i].dataValues["userId"];
-          delete orders[i].dataValues["eventId"];
+          const movie = await Movies.findOne({
+            where: { id: event.dataValues.movieId },
+          });
+
+          delete orders[i].dataValues['userId'];
+          delete orders[i].dataValues['eventId'];
+
+          const newEvent = { ...event.dataValues, movie };
+          delete newEvent.movieId;
+          console.log('New event:' + newEvent);
+
           const newOrder = {
             ...orders[i].dataValues,
             user: user?.dataValues || null,
-            event: event?.dataValues || null,
+            event: newEvent || null,
           };
           newOrders.push(newOrder);
         }
@@ -74,18 +97,18 @@ router.get("/", (req, res) => {
         res.json(newOrders);
       } catch (error) {
         res.statusCode = 500;
-        res.send("Unallowed");
+        res.send('Unallowed');
       }
     }
     myFunc();
   }
 });
 
-router.get("/:id/", (req, res) => {
+router.get('/:id/', (req, res) => {
   res.sendStatus(403);
 });
 
-router.get("/:id/:email", (req, res) => {
+router.get('/:id/:email', (req, res) => {
   console.log(req.params.id);
   console.log(req.params.email);
   if (req.params.id && req.params.email) {
@@ -93,8 +116,8 @@ router.get("/:id/:email", (req, res) => {
       .then((order) => {
         Events.findOne({ where: { id: order.dataValues.eventId } })
           .then((event) => {
-            delete order.dataValues["userId"];
-            delete order.dataValues["eventId"];
+            delete order.dataValues['userId'];
+            delete order.dataValues['eventId'];
             const newOrder = {
               ...order.dataValues,
               event: event?.dataValues || null,
@@ -104,7 +127,7 @@ router.get("/:id/:email", (req, res) => {
           })
           .catch((err) => {
             res.statusCode = 500;
-            res.send("Unallowed");
+            res.send('Unallowed');
           });
       })
       .catch((err) => {
@@ -116,7 +139,7 @@ router.get("/:id/:email", (req, res) => {
   }
 });
 
-router.post("/", (req, res) => {
+router.post('/', (req, res) => {
   Orders.create({
     firstName: req.body.firstName,
     lastName: req.body.lastName,
@@ -138,7 +161,7 @@ router.post("/", (req, res) => {
     });
 });
 
-router.put("/", (req, res) => {
+router.put('/', (req, res) => {
   const data = verifyAccess(req, res);
 
   if (
