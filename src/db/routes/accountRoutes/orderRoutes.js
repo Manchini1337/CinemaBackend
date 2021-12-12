@@ -7,6 +7,7 @@ const Events = require('../../models/cinema/eventModel');
 const Users = require('../../models/accounts/userModel');
 const { verifyAccess } = require('../../../../jwtTokens/verifyToken');
 const userTypes = require('../../../../consts');
+const EventModel = require('../../models/cinema/eventModel');
 
 router.get('/', (req, res) => {
   const data = verifyAccess(req, res);
@@ -149,11 +150,29 @@ router.post('/', (req, res) => {
     eventId: req.body.eventId,
     isPaid: false,
     isCancelled: false,
-    seatId: req.body.seatId,
+    seatId: JSON.stringify(req.body.seatId),
   })
     .then((result) => {
-      res.statusCode = 201;
-      res.json(result);
+      Events.findOne({ where: { id: req.body.eventId } })
+        .then((event) => {
+          const seats = JSON.parse(event.dataValues.seats);
+
+          const orderSeats = req.body.seatId;
+
+          let newSeats = seats;
+          orderSeats.forEach((orderSeat) => {
+            newSeats = newSeats.map((seat) =>
+              seat.id === orderSeat.id ? { ...seat, isAvailable: false } : seat
+            );
+          });
+          event.update({ ...event.dataValues, seats: newSeats });
+          res.statusCode = 201;
+          res.send(result);
+        })
+        .catch((err) => console.log(err));
+
+      // res.statusCode = 201;
+      // res.json(result);
     })
     .catch((err) => {
       res.statusCode = 500;

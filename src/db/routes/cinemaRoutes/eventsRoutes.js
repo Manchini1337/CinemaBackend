@@ -2,6 +2,7 @@ const express = require('express');
 const router = express.Router();
 const db = require('../../config/database');
 const Events = require('../../models/cinema/eventModel');
+const Seats = require('../../models/cinema/seatModel');
 const Movies = require('../../models/movies/movieModel');
 const Genres = require('../../models/movies/genreModel');
 const userTypes = require('../../../../consts');
@@ -27,7 +28,11 @@ router.get('/', (req, res) => {
             const newMovie = { ...movie, genre: genre.dataValues };
             delete newMovie.genreId;
             console.log(newMovie);
-            newEvents.push({ ...event, movie: newMovie });
+            newEvents.push({
+              ...event,
+              movie: newMovie,
+              seats: JSON.parse(event.seats),
+            });
           }
         }
       }
@@ -42,32 +47,60 @@ router.get('/', (req, res) => {
   myFunc();
 });
 
+router.get('/:id', (req, res) => {
+  Events.findOne({ where: { id: req.params.id } })
+    .then((event) => {
+      Movies.findOne({ where: { id: event.dataValues.movieId } })
+        .then((movie) => {
+          const newMovie = movie.dataValues;
+
+          const seats = event.dataValues.seats;
+          console.log(seats);
+          const newEvent = {
+            ...event.dataValues,
+            movie: newMovie,
+            seats: JSON.parse(seats),
+          };
+          delete newEvent['movieId'];
+          res.send(newEvent);
+        })
+        .catch((err) => console.log(err));
+    })
+    .catch((err) => {
+      console.log(err);
+    });
+});
+
 router.post('/', (req, res) => {
   const data = verifyAccess(req, res);
-  if (
-    data &&
-    (data.type === userTypes.ADMIN || data.type === userTypes.PERSONEL)
-  ) {
-    const startDate = Date.parse(req.body.startDate);
-    const endDate = Date.parse(req.body.endDate);
-
-    Events.create({
-      movieId: req.body.movieId,
-      startDate: startDate,
-      endDate: endDate,
-      seats: req.body.seats,
-    })
-      .then((result) => {
-        res.statusCode = 200;
-        res.json(result);
-      })
-      .catch((err) => {
-        res.statusCode = 500;
-        res.json({ ...err, message: 'Błąd jakiś' });
-      });
-  } else {
-    res.sendStatus(403);
+  async function myFunc() {
+    if (
+      data &&
+      (data.type === userTypes.ADMIN || data.type === userTypes.PERSONEL)
+    ) {
+      const startDate = Date.parse(req.body.startDate);
+      const endDate = Date.parse(req.body.endDate);
+      try {
+        const seats = await Seats.findAll();
+        const flattenSeats = seats.map((seat) => seat.dataValues);
+        console.log(flattenSeats);
+        const newEvent = await Events.create({
+          movieId: req.body.movieId,
+          startDate: startDate,
+          endDate: endDate,
+          seats: flattenSeats,
+        });
+        res.statusCode = 201;
+        res.send(newEvent);
+      } catch (err) {
+        console.log(err);
+        res.sendStatus(500);
+      }
+    } else {
+      res.sendStatus(403);
+    }
   }
+  myFunc();
 });
 
 router.put('/', (req, res) => {
