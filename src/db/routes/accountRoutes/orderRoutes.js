@@ -20,7 +20,6 @@ router.get('/', (req, res) => {
         orders.reverse();
 
         for (let i = 0; i < orders.length; i++) {
-          console.log('orders: ', orders[i].dataValues);
           const event = await Events.findOne({
             where: { id: orders[i].dataValues.eventId },
           });
@@ -36,7 +35,6 @@ router.get('/', (req, res) => {
 
           const newEvent = { ...event.dataValues, movie };
           delete newEvent.movieId;
-          console.log('New event:' + newEvent);
 
           const newOrder = {
             ...orders[i].dataValues,
@@ -46,7 +44,6 @@ router.get('/', (req, res) => {
           newOrders.push(newOrder);
         }
 
-        console.log(newOrders);
         res.statusCode = 200;
         res.json(newOrders);
       } catch (error) {
@@ -67,7 +64,6 @@ router.get('/', (req, res) => {
         orders.reverse();
 
         for (let i = 0; i < orders.length; i++) {
-          console.log('orders: ', orders[i].dataValues);
           const event = await Events.findOne({
             where: { id: orders[i].dataValues.eventId },
           });
@@ -83,7 +79,6 @@ router.get('/', (req, res) => {
 
           const newEvent = { ...event.dataValues, movie };
           delete newEvent.movieId;
-          console.log('New event:' + newEvent);
 
           const newOrder = {
             ...orders[i].dataValues,
@@ -93,7 +88,6 @@ router.get('/', (req, res) => {
           newOrders.push(newOrder);
         }
 
-        console.log(newOrders);
         res.statusCode = 200;
         res.json(newOrders);
       } catch (error) {
@@ -110,8 +104,6 @@ router.get('/:id/', (req, res) => {
 });
 
 router.get('/:id/:email', (req, res) => {
-  console.log(req.params.id);
-  console.log(req.params.email);
   if (req.params.id && req.params.email) {
     Orders.findOne({ where: { id: req.params.id, email: req.params.email } })
       .then((order) => {
@@ -148,7 +140,7 @@ router.post('/', (req, res) => {
     email: req.body.email,
     userId: req.body.userId,
     eventId: req.body.eventId,
-    isPaid: false,
+    isPaid: req.body.isPaid ? req.body.isPaid : false,
     isCancelled: false,
     seatId: JSON.stringify(req.body.seatId),
   })
