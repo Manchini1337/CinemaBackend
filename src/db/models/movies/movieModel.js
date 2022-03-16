@@ -1,13 +1,13 @@
-const Sequelize = require("sequelize");
-const db = require("../../config/database");
+const Sequelize = require('sequelize');
+const db = require('../../config/database');
 
-const MovieModel = db.define("Movies", {
+const MovieModel = db.define('Movies', {
   name: {
     type: Sequelize.STRING,
     allowNull: false,
   },
   description: {
-    type: Sequelize.STRING,
+    type: Sequelize.TEXT('long'),
     allowNull: false,
   },
   trailerUrl: {
@@ -19,11 +19,11 @@ const MovieModel = db.define("Movies", {
     allowNull: false,
   },
   poster: {
-    type: Sequelize.TEXT("long"),
+    type: Sequelize.TEXT('long'),
     allowNull: false,
   },
   background: {
-    type: Sequelize.TEXT("long"),
+    type: Sequelize.TEXT('long'),
     allowNull: false,
   },
 });

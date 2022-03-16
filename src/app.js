@@ -12,7 +12,7 @@ app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
 
 // Db connection
 // db.sync({ force: true })
-//   .then(() => console.log("Authenticated"))
+//   .then(() => console.log('Authenticated'))
 //   .catch((err) => console.log(err));
 
 db.authenticate()

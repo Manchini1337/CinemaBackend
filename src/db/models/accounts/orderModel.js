@@ -1,7 +1,7 @@
-const Sequelize = require("sequelize");
-const db = require("../../config/database");
+const Sequelize = require('sequelize');
+const db = require('../../config/database');
 
-const OrderModel = db.define("Orders", {
+const OrderModel = db.define('Orders', {
   firstName: {
     type: Sequelize.STRING,
     allowNull: false,
@@ -35,7 +35,7 @@ const OrderModel = db.define("Orders", {
     allowNull: false,
   },
   seatId: {
-    type: Sequelize.STRING,
+    type: Sequelize.TEXT('long'),
     allowNull: false,
   },
 });
