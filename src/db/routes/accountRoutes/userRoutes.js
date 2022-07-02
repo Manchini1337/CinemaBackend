@@ -176,6 +176,29 @@ router.put('/', (req, res) => {
   }
 });
 
+router.put('/permission', (req, res) => {
+  const data = verifyAccess(req, res);
+  if (data && data.type === 'ADMIN') {
+    Users.update(
+      {
+        type: req.body.type.toUpperCase(),
+      },
+      { where: { id: req.body.id } }
+    )
+      .then((result) => {
+        console.log('console log result: ', result);
+        res.statusCode = 200;
+
+        res.send('Pomyślnie zaaktualizowano dane.');
+      })
+      .catch((err) => {
+        console.log('blad console log error: ', err);
+        res.statusCode = 500;
+        res.json({ ...err, message: 'Błąd serwera' });
+      });
+  }
+});
+
 router.post('/login', (req, res) => {
   Users.findOne({ where: { username: req.body.username } })
     .then((data) => {
