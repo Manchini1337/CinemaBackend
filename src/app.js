@@ -32,4 +32,6 @@ app.use(
 
 app.use('/seats', require('./db/routes/cinemaRoutes/seatsRoutes'));
 app.use('/events', require('./db/routes/cinemaRoutes/eventsRoutes'));
-app.listen(8080, () => console.log('App is running...'));
+
+const PORT = process.env.PORT || 8080;
+app.listen(PORT, () => console.log('App is running...'));
