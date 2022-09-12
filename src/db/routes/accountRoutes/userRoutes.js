@@ -42,7 +42,7 @@ router.get('/data', (req, res) => {
       })
       .catch((err) => {
         res.statusCode = 500;
-        res.json({ ...err, message: 'Błąd serwera1' });
+        res.json({ ...err, message: 'Błąd serwera' });
       });
   } else {
     checkCookies(req, res);
@@ -77,7 +77,7 @@ router.post('/', (req, res) => {
                 })
                 .catch((err) => {
                   res.statusCode = 500;
-                  res.json({ ...err, message: 'Błąd serwera1' });
+                  res.json({ ...err, message: 'Błąd serwera' });
                 });
             } else {
               Users.create({
@@ -97,13 +97,13 @@ router.post('/', (req, res) => {
                 })
                 .catch((err) => {
                   res.statusCode = 500;
-                  res.json({ ...err, message: 'Błąd serwera2' });
+                  res.json({ ...err, message: 'Błąd serwera' });
                 });
             }
           })
           .catch((err) => {
             res.statusCode = 500;
-            res.json({ ...err, message: 'Błąd serwera3' });
+            res.json({ ...err, message: 'Błąd serwera' });
           });
       }
     })
@@ -223,12 +223,12 @@ router.post('/login', (req, res) => {
             res.send(data.dataValues);
           } else {
             res.statusCode = 401;
-            res.json({ message: 'Nieprawidłowe dane logowania1' });
+            res.json({ message: 'Nieprawidłowe dane logowania' });
           }
         })
         .catch(() => {
           res.statusCode = 401;
-          res.json({ message: 'Nieprawidłowe dane logowania2' });
+          res.json({ message: 'Nieprawidłowe dane logowania' });
         });
     })
     .catch(() => {
